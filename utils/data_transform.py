@@ -19,6 +19,16 @@ class DataTransform(object):
         x2 = (labels[:, 1] + labels[:, 3] / 2.)*width
         y1 = (labels[:, 2] - labels[:, 4] / 2.)*height
         y2 = (labels[:, 2] - labels[:, 4] / 2.)*height
+        p1=np.concatenate((x1,y1), axis=-1)
+        p2=np.concatenate((x2,y1), axis=-1)
+        p3=np.concatenate((x1,y2), axis=-1)
+        p4=np.concatenate((x2,y2), axis=-1)
+        np1=rotated_mat[:,:-1]*p1+rotated_mat[:,-1]
+        np2=rotated_mat[:,:-1]*p2+rotated_mat[:,-1]
+        np3=rotated_mat[:,:-1]*p3+rotated_mat[:,-1]
+        np4=rotated_mat[:,:-1]*p4+rotated_mat[:,-1]
+
+
 
         nx1=transform_matrix[0,0]*x1+transform_matrix[0,1]*y1
         nx2=
