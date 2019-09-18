@@ -69,27 +69,34 @@ class DataTransform(object):
         xmax=np.max(xmax)
         ymax=np.max(ymax)
 
-
         board=np.ones_like(in_mat)
         board[:,:,0]=borderValue[0]
         board[:,:,1]=borderValue[1]
         board[:,:,2]=borderValue[2]
-        wk_ratio=max(random.uniform(wkmin_ratio,1),(xmax-xmin))
-        hk_ratio=max(random.uniform(hkmin_ratio,1),(ymax-ymin))
-        x_start=random.uniform(0.5-wk_ratio/2,xmin)
-        y_start=random.uniform(0.5-hk_ratio/2,ymin)
-        x_end= min(1,x_start+wk_ratio)
-        y_end= min(1,y_start+hk_ratio)
 
-        patch=in_mat[ int(y_start*height):int(y_end*height),int(x_start*width):int(x_end*width),:]
+        print(xmin,xmax,ymin,ymax)
+        wkmin_ratio=max(wkmin_ratio,xmax-xmin)
+        hkmin_ratio=max(hkmin_ratio,ymax-ymin)
+        print(wkmin_ratio,hkmin_ratio)
+        x_min_offset=xmax-wkmin_ratio if xmax-wkmin_ratio >0 else 0
+        x_max_offset= 1-wkmin_ratio if 1-wkmin_ratio< xmin else xmin
+        y_min_offset = ymax - hkmin_ratio if ymax - hkmin_ratio > 0 else 0
+        y_max_offset = 1-hkmin_ratio if 1-hkmin_ratio< ymin else ymin
+        print(x_min_offset,x_max_offset,y_min_offset,y_max_offset)
+        x_offset=random.uniform(x_min_offset,x_max_offset)
+        y_offset=random.uniform(y_min_offset,y_max_offset)
+
+        print(x_offset,y_offset)
+
+        patch=in_mat[ int(y_offset*height):int((y_offset+hkmin_ratio)*height),int(x_offset*width):int((x_offset+wkmin_ratio)*width),:]
 
         deltax=random.randint(0,width-patch.shape[1])
         deltay=random.randint(0,height-patch.shape[0])
         board[deltay:deltay+patch.shape[0],deltax:deltax+patch.shape[1],:]=patch
 
         nlabels=labels.copy()
-        nlabels[:, 1] += deltax/width-x_start
-        nlabels[:, 2] += deltay / height-y_start
+        nlabels[:, 1] += deltax/width-x_offset
+        nlabels[:, 2] += deltay / height-y_offset
         return board,nlabels
 
 if __name__=='__main__':
@@ -101,8 +108,6 @@ if __name__=='__main__':
 
     data_transform.DrawLabel(in_mat, l)
 
-    # in_mat = cv2.imread(sys.argv[1])
-    #
     out_mat,labels =data_transform.RandomCrop(in_mat,l)
     print(labels)
     out_mat = data_transform.DrawLabel(out_mat, labels)
